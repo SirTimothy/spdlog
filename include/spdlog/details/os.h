@@ -177,9 +177,14 @@ inline int rename(const filename_t& filename1, const filename_t& filename2)
 inline bool file_exists(const filename_t& filename)
 {
 #ifdef _WIN32
-#if WINAPI_PARTITION_APP
-    // #TODO: How to do this?
-    return true;
+#if !WINAPI_PARTITION_DESKTOP
+#ifdef SPDLOG_WCHAR_FILENAMES
+	struct _stat buffer;
+	return (_wstat(filename.c_str(), &buffer) == 0);
+#else
+	struct _stat buffer;
+	return (_stat(filename.c_str(), &buffer) == 0);
+#endif
 #else
 #ifdef SPDLOG_WCHAR_FILENAMES
     auto attribs = GetFileAttributesW(filename.c_str());
